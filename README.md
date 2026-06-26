@@ -5,7 +5,7 @@ images from a folder onto print-ready sheets, pairs fronts with backs by
 filename, and lays out duplex (double-sided) sheets that mirror correctly for
 flip alignment.
 
-Built for tabletop card printing — custom decks, prototypes, proxies — where you
+Built for tabletop card printing (custom decks, prototypes, proxies) where you
 want many cards laid out on a single sheet with proper margins, gutters, bleed,
 and cut marks.
 
@@ -13,13 +13,13 @@ and cut marks.
 
 - **Automatic front/back pairing** by filename (case-insensitive).
 - **Duplex back sheets** that mirror for either long-edge or short-edge flip.
-- **Backside registration calibration** — nudge backs by an X/Y offset in mm to
+- **Backside registration calibration**: nudge backs by an X/Y offset in mm to
   correct printer misalignment.
-- **Cut marks** — corner crop marks or full gutter gridlines, rendered as the
+- **Cut marks**: corner crop marks or full gutter gridlines, rendered as the
   mask of a 30%-opacity Invert adjustment layer so they stay visible over both
   light and dark artwork.
-- **Bleed support** — arranges cards at a bleed-inclusive size so images are
-  never cropped; marks are drawn at the trim line.
+- **Bleed support**: arranges cards at a bleed-inclusive size so images are
+  never cropped, with marks drawn at the trim line.
 - **Numbered test reference sheet** to dial in duplex alignment before
   committing a full run.
 - **Multi-sheet pagination** for decks larger than one sheet.
@@ -32,8 +32,8 @@ and cut marks.
 ## Requirements
 
 - Adobe Photoshop (tested through Photoshop 2025).
-- No installation — the script is plain ExtendScript (ES3) using the classic
-  Photoshop DOM.
+- No installation needed. The script is plain ExtendScript (ES3) that uses the
+  classic Photoshop DOM.
 
 ## Usage
 
@@ -65,7 +65,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the history of changes.
 ## Project layout
 
 ```
-KodaSheets.jsx        The script — run this in Photoshop.
+KodaSheets.jsx        The script. Run this in Photoshop.
 src/engine/           Reference layout/units math (the JSX has its own ES3 port).
 test/                 Layout unit tests.
 archive/uxp-plugin/   Earlier UXP plugin prototype (not used).
