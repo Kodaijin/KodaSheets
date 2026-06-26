@@ -1,0 +1,458 @@
+/* Koda Sheets - Dark Mode Photoshop UXP Theme */
+
+:root {
+  --ps-bg-primary: #323232;
+  --ps-bg-secondary: #2b2b2b;
+  --ps-border: #1e1e1e;
+  --ps-text: #d8d8d8;
+  --ps-text-secondary: #b3b3b3;
+  --ps-accent: #2680eb;
+  --ps-accent-hover: #0d66d0;
+  --ps-section-bg: #2e2e2e;
+  --ps-input-bg: #3d3d3d;
+  --ps-divider: #404040;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* The panel root: body is a fixed, non-scrolling viewport; the
+   .panel-container inside it is the single vertical scroll region.
+   This avoids nested/competing scroll areas that misbehave in UXP. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  background-color: var(--ps-bg-primary);
+  color: var(--ps-text);
+}
+
+.panel-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+}
+
+/* CRITICAL: every top-level section keeps its natural height and never
+   gets compressed by the flex column. Without this, UXP squeezes the
+   sections when the panel is short and their controls overlap. */
+.panel-container > section {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.panel-container > section:last-child {
+  margin-bottom: 0;
+}
+
+/* SECTION STYLING */
+.card-section {
+  background-color: var(--ps-section-bg);
+  border: 1px solid var(--ps-border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.card-section h2 {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ps-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--ps-divider);
+  padding-bottom: 6px;
+}
+
+/* CONTROL GROUPS */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.control-group:last-child {
+  margin-bottom: 0;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ps-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.control-group input[type="number"],
+.control-group input[type="text"] {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  height: 30px;
+  background-color: var(--ps-input-bg);
+  border: 1px solid var(--ps-divider);
+  border-radius: 3px;
+  color: var(--ps-text);
+  padding: 4px 10px;
+  font-size: 13px;
+  line-height: 22px;
+  font-family: inherit;
+}
+
+.control-group input[type="number"]:focus,
+.control-group input[type="text"]:focus {
+  outline: none;
+  border-color: var(--ps-accent);
+}
+
+/* Checkbox + its inline text label (checkbox sits inside the <label>) */
+.control-group input[type="checkbox"] {
+  margin-right: 6px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* UXP Dropdown */
+sp-dropdown {
+  width: 100%;
+  min-height: 30px;
+}
+
+sp-menu-item {
+  color: var(--ps-text);
+}
+
+.helper-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--ps-text-secondary);
+  font-style: italic;
+}
+
+/* HIDDEN STATE */
+.hidden {
+  display: none !important;
+}
+
+/* TABS SECTION */
+.tabs-section {
+  padding: 0;
+}
+
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid var(--ps-divider);
+}
+
+.tab-button {
+  flex: 1 1 0;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ps-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.tab-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--ps-text);
+}
+
+.tab-button.active {
+  border-bottom-color: var(--ps-accent);
+  color: var(--ps-text);
+  background-color: rgba(38, 128, 235, 0.1);
+}
+
+/* GRID SECTION — grows with content; the whole panel scrolls. */
+.grid-section {
+  min-height: 120px;
+}
+
+.grid-hint {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--ps-text-secondary);
+  text-align: center;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 8px;
+  gap: 8px;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+/* ACTIONS SECTION — stack buttons full-width so they never overlap. */
+.actions-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-button {
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+  border-radius: 3px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+}
+
+.action-button:last-child {
+  margin-bottom: 0;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.action-button.primary {
+  background-color: var(--ps-accent);
+  color: #fff;
+}
+
+.action-button.primary:hover {
+  background-color: var(--ps-accent-hover);
+}
+
+.action-button.secondary {
+  background-color: var(--ps-input-bg);
+  color: var(--ps-text);
+  border: 1px solid var(--ps-divider);
+}
+
+.action-button.secondary:hover {
+  border-color: var(--ps-accent);
+  color: var(--ps-accent);
+}
+
+/* STATUS BAR — always-visible feedback for generation runs / errors */
+.status-bar {
+  margin-top: 8px;
+  padding: 6px 8px;
+  min-height: 16px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ps-text-secondary);
+  background-color: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--ps-divider);
+  border-radius: 3px;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.status-bar.status-busy {
+  color: var(--ps-text);
+  border-color: var(--ps-accent);
+}
+
+.status-bar.status-error {
+  color: #ff8a80;
+  border-color: #c62828;
+  background-color: rgba(198, 40, 40, 0.12);
+}
+
+.status-bar.status-ok {
+  color: #a5d6a7;
+  border-color: #2e7d32;
+}
+
+/* SCROLLBAR */
+.panel-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panel-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel-container::-webkit-scrollbar-thumb {
+  background-color: var(--ps-divider);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Step 4: Grid & Slots
+   Slots use the padding-ratio box technique (NOT aspect-ratio,
+   which UXP renderers do not reliably support). The slot is a
+   relative box whose height comes from padding-bottom; all of
+   its visual content is absolutely positioned inside it.
+   ============================================================ */
+
+.grid-slot {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 140%;          /* 5:7 portrait card proportion */
+  background-color: var(--ps-input-bg);
+  border: 1px solid var(--ps-divider);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  min-width: 0;
+  user-select: none;
+}
+
+.grid-slot:hover {
+  border-color: var(--ps-accent);
+}
+
+.grid-slot--assigned {
+  border-color: var(--ps-accent);
+}
+
+.grid-slot.drag-over {
+  border-color: #fff;
+  background-color: rgba(38, 128, 235, 0.15);
+}
+
+/* Corner badge (card number) */
+.slot-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #e0e0e0;
+  pointer-events: none;
+}
+
+.grid-slot--assigned .slot-badge {
+  background-color: var(--ps-accent);
+  color: #fff;
+}
+
+/* Thumbnail image fills the slot box */
+.slot-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* Remove (×) button */
+.slot-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 3;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background-color: rgba(30, 30, 30, 0.85);
+  color: #e0e0e0;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  text-align: center;
+}
+
+.slot-remove:hover {
+  background-color: #c62828;
+  color: #fff;
+}
+
+/* Empty slot "+" affordance — absolutely centered */
+.slot-plus {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  color: var(--ps-text-secondary);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.grid-slot:hover .slot-plus {
+  color: var(--ps-accent);
+}
+
+/* Identical-back hint text — pinned near the bottom of the box */
+.slot-identical-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  font-size: 9px;
+  color: var(--ps-text-secondary);
+  text-align: center;
+  padding: 0 6px;
+  pointer-events: none;
+}
+
+/* Identical Back single drop target */
+.identical-back-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  width: 100%;
+}
+
+.grid-slot--identical {
+  width: 140px;
+  height: 0;
+  padding-bottom: 196px;          /* 140 * 1.4 → 5:7 at fixed width */
+  border-style: dashed;
+  border-color: var(--ps-accent);
+}
+
+/* Back-view caption */
+.back-view-caption {
+  margin: 0 0 6px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--ps-text-secondary);
+  font-style: italic;
+  text-align: center;
+  border-bottom: 1px solid var(--ps-divider);
+}
+
+/* "No cards fit" message */
+.grid-empty-msg {
+  margin: 0;
+  padding: 16px;
+  font-size: 11px;
+  color: var(--ps-text-secondary);
+  text-align: center;
+  font-style: italic;
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Koda Sheets</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="kodaSheetsPanel" class="panel-container">
+    <!-- SETTINGS SECTION -->
+    <section class="settings-section card-section">
+      <h2>Settings</h2>
+
+      <!-- Paper Preset -->
+      <div class="control-group">
+        <label for="paperPreset">Paper</label>
+        <sp-dropdown id="paperPreset">
+          <sp-menu slot="options">
+            <sp-menu-item>US Letter</sp-menu-item>
+            <sp-menu-item>A4</sp-menu-item>
+            <sp-menu-item>Custom</sp-menu-item>
+          </sp-menu>
+        </sp-dropdown>
+      </div>
+
+      <!-- Custom Paper Dimensions (hidden by default) -->
+      <div class="control-group hidden" id="customPaperGroup">
+        <label for="paperW">Width (mm)</label>
+        <input type="number" id="paperW" min="10" max="1000" value="210" />
+      </div>
+      <div class="control-group hidden" id="customPaperHeightGroup">
+        <label for="paperH">Height (mm)</label>
+        <input type="number" id="paperH" min="10" max="1000" value="297" />
+      </div>
+
+      <!-- Card Preset -->
+      <div class="control-group">
+        <label for="cardPreset">Card</label>
+        <sp-dropdown id="cardPreset">
+          <sp-menu slot="options">
+            <sp-menu-item>Poker (63×88)</sp-menu-item>
+            <sp-menu-item>Bridge (56×88)</sp-menu-item>
+            <sp-menu-item>Tarot (70×120)</sp-menu-item>
+            <sp-menu-item>Standard TCG (63×88)</sp-menu-item>
+            <sp-menu-item>Custom</sp-menu-item>
+          </sp-menu>
+        </sp-dropdown>
+      </div>
+
+      <!-- Custom Card Dimensions (hidden by default) -->
+      <div class="control-group hidden" id="customCardGroup">
+        <label for="cardW">Width (mm)</label>
+        <input type="number" id="cardW" min="10" max="300" value="63" />
+      </div>
+      <div class="control-group hidden" id="customCardHeightGroup">
+        <label for="cardH">Height (mm)</label>
+        <input type="number" id="cardH" min="10" max="300" value="88" />
+      </div>
+
+      <!-- PPI -->
+      <div class="control-group">
+        <label for="ppi">Resolution (PPI)</label>
+        <input type="number" id="ppi" min="72" max="2400" value="1200" />
+      </div>
+
+      <!-- Margins and Gutter -->
+      <div class="control-group">
+        <label for="margin">Margin (mm)</label>
+        <input type="number" id="margin" min="0" max="50" value="5" step="0.5" />
+      </div>
+
+      <div class="control-group">
+        <label for="gutter">Gutter (mm)</label>
+        <input type="number" id="gutter" min="0" max="50" value="2" step="0.5" />
+      </div>
+
+      <!-- Cut Marks -->
+      <div class="control-group">
+        <label>
+          <input type="checkbox" id="cutMarksOn" />
+          Cut Marks
+        </label>
+      </div>
+
+      <div class="control-group hidden" id="cutMarksStyleGroup">
+        <label for="cutMarksStyle">Style</label>
+        <sp-dropdown id="cutMarksStyle">
+          <sp-menu slot="options">
+            <sp-menu-item>Corner crop marks</sp-menu-item>
+            <sp-menu-item>Full gutter gridlines</sp-menu-item>
+          </sp-menu>
+        </sp-dropdown>
+      </div>
+
+      <!-- Placement -->
+      <div class="control-group">
+        <label for="placement">Placement</label>
+        <sp-dropdown id="placement">
+          <sp-menu slot="options">
+            <sp-menu-item>Smart Object</sp-menu-item>
+            <sp-menu-item>Rasterized</sp-menu-item>
+          </sp-menu>
+        </sp-dropdown>
+      </div>
+
+      <!-- Backside Mode -->
+      <div class="control-group">
+        <label for="backsideMode">Backside Mode</label>
+        <sp-dropdown id="backsideMode">
+          <sp-menu slot="options">
+            <sp-menu-item>Identical Back</sp-menu-item>
+            <sp-menu-item>Unique Backs</sp-menu-item>
+          </sp-menu>
+        </sp-dropdown>
+      </div>
+    </section>
+
+    <!-- ADJUSTMENTS SECTION -->
+    <section class="adjustments-section card-section">
+      <h2>Adjustments</h2>
+
+      <div class="control-group">
+        <label for="offsetX">X Offset (mm)</label>
+        <input type="number" id="offsetX" min="-50" max="50" value="0" step="0.1" />
+        <span class="helper-text">Calibrates backside duplex registration</span>
+      </div>
+
+      <div class="control-group">
+        <label for="offsetY">Y Offset (mm)</label>
+        <input type="number" id="offsetY" min="-50" max="50" value="0" step="0.1" />
+        <span class="helper-text">Calibrates backside duplex registration</span>
+      </div>
+    </section>
+
+    <!-- TAB VIEW TOGGLE -->
+    <section class="tabs-section">
+      <div class="tab-buttons">
+        <button id="tabFront" class="tab-button active" data-tab="front">Front View</button>
+        <button id="tabBack" class="tab-button" data-tab="back">Back View</button>
+      </div>
+    </section>
+
+    <!-- GRID CONTAINER -->
+    <section class="grid-section">
+      <p class="grid-hint">Click a card slot below to choose an image.</p>
+      <div id="grid" class="grid-container"></div>
+    </section>
+
+    <!-- ACTION BUTTONS -->
+    <section class="actions-section">
+      <button id="btnGenerate" class="action-button primary">Generate Sheet</button>
+      <button id="btnTestSheet" class="action-button secondary">Generate Test Reference Sheet</button>
+      <div id="status" class="status-bar"></div>
+    </section>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
