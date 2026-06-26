@@ -15,13 +15,25 @@ and cut marks.
 - **Duplex back sheets** that mirror for either long-edge or short-edge flip.
 - **Backside registration calibration**: nudge backs by an X/Y offset in mm to
   correct printer misalignment.
-- **Cut marks**: corner crop marks or full gutter gridlines, rendered as the
-  mask of a 30%-opacity Invert adjustment layer so they stay visible over both
-  light and dark artwork.
+- **Cut marks** with several styles and controls:
+  - Corner crop marks, corner crosses, or full gutter gridlines.
+  - Corner marks can sit at the card (trim) edge or the bleed edge.
+  - Optional center fold/registration ticks on each sheet edge.
+  - Optional dashed gutter gridlines.
+  - Adjustable mark length (mm) and line weight (pt).
+  - Drawn as either a masked Invert adjustment layer (subtle, stays visible over
+    both light and dark artwork) or solid black lines, at a configurable opacity.
 - **Bleed support**: arranges cards at a bleed-inclusive size so images are
   never cropped, with marks drawn at the trim line.
-- **Numbered test reference sheet** to dial in duplex alignment before
-  committing a full run.
+- **Backside alignment test** as a ready-to-print PDF
+  (`BacksideAlignmentTest.pdf`): print it double-sided at 100%, hold to a light,
+  and read the back crosshair against the front mm ruler to find the X/Y offset
+  to enter.
+- **Single-document output**: every front and back sheet is a top-level group in
+  one document, so you can toggle and print them individually.
+- **Global adjustment layers**: Vibrance and Brightness/Contrast layers, grouped
+  with the cut marks in a "Cut Marks & Adjustments" folder at the top of the
+  stack, for quick tweaks across all sheets.
 - **Multi-sheet pagination** for decks larger than one sheet.
 - **Smart Object or rasterized** placement.
 - Paper presets (US Letter, A4, Custom) and card presets (Poker, Bridge, Tarot,
@@ -44,6 +56,14 @@ and cut marks.
 
 Settings are remembered between runs.
 
+### Backside alignment (duplex)
+
+To calibrate the back offset, print `BacksideAlignmentTest.pdf` double-sided at
+**100% / Actual Size** (do not "scale to fit"), flipping on the edge your printer
+uses. Hold the sheet to a light and read where the back crosshair lands on the
+front ruler; enter those millimetre values as **Back calibration X / Y** in the
+dialog. The PDF is regenerated with `python tools/make_alignment_pdf.py`.
+
 ## Naming convention for backs
 
 Pairing is case-insensitive; the separator is a space, underscore, or hyphen.
@@ -65,10 +85,12 @@ See [CHANGELOG.md](CHANGELOG.md) for the history of changes.
 ## Project layout
 
 ```
-KodaSheets.jsx        The script. Run this in Photoshop.
-src/engine/           Reference layout/units math (the JSX has its own ES3 port).
-test/                 Layout unit tests.
-archive/uxp-plugin/   Earlier UXP plugin prototype (not used).
+KodaSheets.jsx              The script. Run this in Photoshop.
+BacksideAlignmentTest.pdf   Printable duplex offset calibration sheet.
+tools/make_alignment_pdf.py Regenerates the alignment PDF (needs reportlab).
+src/engine/                 Reference layout/units math (the JSX has its own ES3 port).
+test/                       Layout unit tests.
+archive/uxp-plugin/         Earlier UXP plugin prototype (not used).
 ```
 
 ## License

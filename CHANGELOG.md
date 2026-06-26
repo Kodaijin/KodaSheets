@@ -7,14 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- Cut marks are now rendered as the mask of a 30%-opacity Invert adjustment
-  layer instead of a flat black-line layer, so they stay visible over both light
-  and dark artwork.
-
 ### Added
 
+- All generated sheets now live in a single document, with each front/back sheet
+  as its own top-level group, instead of one document per sheet.
+- Vibrance and Brightness/Contrast adjustment layers, together with the cut
+  marks, are grouped in their own "Cut Marks & Adjustments" folder at the very
+  top of the layer stack, so the adjustments stay global across all sheets.
+- Cut-mark opacity is now a dialog input (percent), replacing the fixed 30%.
+- New "Corner crosses" cut-mark style (a `+` centered on each corner).
+- Corner marks can be placed at the card (trim) edge or the bleed edge.
+- Adjustable mark length (mm) and line weight (pt) for all cut-mark styles.
+- "Solid black lines" mode as an alternative to the Invert adjustment layer.
+- Optional center fold/registration ticks at the midpoint of each sheet edge.
+- Optional dashed gutter gridlines.
+- `BacksideAlignmentTest.pdf`, a printable duplex offset calibration sheet
+  (crosshair + numbered mm ruler + instructions), with a `tools/` generator.
 - `README.md` project documentation.
 - `CHANGELOG.md` (this file).
 - GNU GPLv3 `LICENSE`.
+
+### Removed
+
+- The in-script "Generate Test Sheet" button. Backside calibration is now the
+  printable `BacksideAlignmentTest.pdf` instead of generated Photoshop documents.
+
+### Changed
+
+- Cut marks are rendered as the mask of an Invert adjustment layer (by default)
+  instead of a flat black-line layer, so they stay visible over both light and
+  dark artwork.

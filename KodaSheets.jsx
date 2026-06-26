@@ -5,9 +5,9 @@
  * Tiles individual card images from a folder onto print sheets, with:
  *   - automatic front/back pairing by filename
  *   - duplex (double-sided) back sheets that mirror for flip alignment
- *   - backside registration calibration (X/Y mm offset)
+ *   - backside registration calibration (X/Y mm offset); measure it with the
+ *     printable BacksideAlignmentTest.pdf
  *   - corner crop marks OR full gutter gridlines
- *   - a numbered test reference sheet to dial in duplex alignment
  *   - multi-sheet pagination for full decks
  *
  * ExtendScript (ES3) — uses the classic Photoshop DOM. Works through
@@ -45,7 +45,9 @@
         ["Standard TCG (63x88)", 63, 88],
         ["Custom", 0, 0]
     ];
-    var CUTMARK_STYLES = ["Corner crop marks", "Full gutter gridlines"];
+    var CUTMARK_STYLES = ["Corner crop marks", "Corner crosses", "Full gutter gridlines"];
+    var CUTMARK_EDGES = ["Card edge (trim)", "Bleed edge"];
+    var CUTMARK_MODES = ["Invert (subtle)", "Solid black lines"];
     var PLACEMENT_MODES = ["Smart Object", "Rasterized"];
     var DUPLEX_FLIPS = ["Long edge (left-right)", "Short edge (top-bottom)"];
     // [label, cols, rows] — cols/rows of 0 means Auto (fit as many as possible).
@@ -74,6 +76,13 @@
             gutter: 2,
             cutMarksOn: false,
             cutMarksStyle: 0,
+            cutMarksOpacity: 30,   // percent
+            cutMarksEdge: 0,       // 0 = card/trim edge, 1 = bleed edge (corner styles)
+            cutMarksMode: 0,       // 0 = invert layer, 1 = solid black lines
+            cutMarksLenMm: 3,      // arm length of corner/center marks
+            cutMarksWeightPt: 0.25,// line weight
+            cutMarksCenter: false, // add center fold/registration ticks
+            cutMarksDashed: false, // dashed gutter gridlines
             placement: 0,
             duplex: true,
             duplexFlip: 1,   // short edge (top-bottom) is the common home-printer default
@@ -330,6 +339,13 @@
             d.putDouble(sid("gutter"), s.gutter);
             d.putBoolean(sid("cutMarksOn"), s.cutMarksOn);
             d.putInteger(sid("cutMarksStyle"), s.cutMarksStyle);
+            d.putDouble(sid("cutMarksOpacity"), s.cutMarksOpacity);
+            d.putInteger(sid("cutMarksEdge"), s.cutMarksEdge);
+            d.putInteger(sid("cutMarksMode"), s.cutMarksMode);
+            d.putDouble(sid("cutMarksLenMm"), s.cutMarksLenMm);
+            d.putDouble(sid("cutMarksWeightPt"), s.cutMarksWeightPt);
+            d.putBoolean(sid("cutMarksCenter"), s.cutMarksCenter);
+            d.putBoolean(sid("cutMarksDashed"), s.cutMarksDashed);
             d.putInteger(sid("placement"), s.placement);
             d.putBoolean(sid("duplex"), s.duplex);
             d.putInteger(sid("duplexFlip"), s.duplexFlip);
@@ -359,6 +375,13 @@
             if (d.hasKey(sid("gutter"))) s.gutter = d.getDouble(sid("gutter"));
             if (d.hasKey(sid("cutMarksOn"))) s.cutMarksOn = d.getBoolean(sid("cutMarksOn"));
             if (d.hasKey(sid("cutMarksStyle"))) s.cutMarksStyle = d.getInteger(sid("cutMarksStyle"));
+            if (d.hasKey(sid("cutMarksOpacity"))) s.cutMarksOpacity = d.getDouble(sid("cutMarksOpacity"));
+            if (d.hasKey(sid("cutMarksEdge"))) s.cutMarksEdge = d.getInteger(sid("cutMarksEdge"));
+            if (d.hasKey(sid("cutMarksMode"))) s.cutMarksMode = d.getInteger(sid("cutMarksMode"));
+            if (d.hasKey(sid("cutMarksLenMm"))) s.cutMarksLenMm = d.getDouble(sid("cutMarksLenMm"));
+            if (d.hasKey(sid("cutMarksWeightPt"))) s.cutMarksWeightPt = d.getDouble(sid("cutMarksWeightPt"));
+            if (d.hasKey(sid("cutMarksCenter"))) s.cutMarksCenter = d.getBoolean(sid("cutMarksCenter"));
+            if (d.hasKey(sid("cutMarksDashed"))) s.cutMarksDashed = d.getBoolean(sid("cutMarksDashed"));
             if (d.hasKey(sid("placement"))) s.placement = d.getInteger(sid("placement"));
             if (d.hasKey(sid("duplex"))) s.duplex = d.getBoolean(sid("duplex"));
             if (d.hasKey(sid("duplexFlip"))) s.duplexFlip = d.getInteger(sid("duplexFlip"));
@@ -492,8 +515,48 @@
         var cutDd = o2.add("dropdownlist", undefined);
         for (i = 0; i < CUTMARK_STYLES.length; i++) cutDd.add("item", CUTMARK_STYLES[i]);
         cutDd.selection = s.cutMarksStyle;
-        cutChk.onClick = function () { cutDd.enabled = cutChk.value; };
-        cutDd.enabled = cutChk.value;
+        o2.add("statictext", undefined, "  Edge:");
+        var edgeDd = o2.add("dropdownlist", undefined);
+        for (i = 0; i < CUTMARK_EDGES.length; i++) edgeDd.add("item", CUTMARK_EDGES[i]);
+        edgeDd.selection = s.cutMarksEdge;
+
+        var o2b = row(outP);
+        o2b.add("statictext", undefined, "Mode:");
+        var modeDd = o2b.add("dropdownlist", undefined);
+        for (i = 0; i < CUTMARK_MODES.length; i++) modeDd.add("item", CUTMARK_MODES[i]);
+        modeDd.selection = s.cutMarksMode;
+        o2b.add("statictext", undefined, "  Opacity:");
+        var opacTxt = o2b.add("edittext", undefined, String(s.cutMarksOpacity)); opacTxt.characters = 4;
+        o2b.add("statictext", undefined, "%");
+
+        var o2c = row(outP);
+        o2c.add("statictext", undefined, "Mark length:");
+        var mlenTxt = o2c.add("edittext", undefined, String(s.cutMarksLenMm)); mlenTxt.characters = 4;
+        o2c.add("statictext", undefined, "mm  Line weight:");
+        var mwtTxt = o2c.add("edittext", undefined, String(s.cutMarksWeightPt)); mwtTxt.characters = 4;
+        o2c.add("statictext", undefined, "pt");
+
+        var o2d = row(outP);
+        var centerChk = o2d.add("checkbox", undefined, "Center fold/registration marks");
+        centerChk.value = s.cutMarksCenter;
+        var dashedChk = o2d.add("checkbox", undefined, "Dashed gutter lines");
+        dashedChk.value = s.cutMarksDashed;
+
+        function syncCut() {
+            var on = cutChk.value;
+            var isGutter = (CUTMARK_STYLES[cutDd.selection.index] === "Full gutter gridlines");
+            cutDd.enabled = on;
+            edgeDd.enabled = on && !isGutter;   // edge choice only affects corner styles
+            modeDd.enabled = on;
+            opacTxt.enabled = on;
+            mlenTxt.enabled = on;
+            mwtTxt.enabled = on;
+            centerChk.enabled = on;
+            dashedChk.enabled = on && isGutter; // dashed only affects the gutter style
+        }
+        cutChk.onClick = syncCut;
+        cutDd.onChange = syncCut;
+        syncCut();
 
         var od = row(outP);
         var dupChk = od.add("checkbox", undefined, "Duplex back sheet(s).  Flip on:");
@@ -529,7 +592,6 @@
         btns.orientation = "row"; btns.alignment = "center";
         var scanBtn = btns.add("button", undefined, "Scan");
         var genBtn = btns.add("button", undefined, "Generate Sheets");
-        var testBtn = btns.add("button", undefined, "Generate Test Sheet");
         var cancelBtn = btns.add("button", undefined, "Cancel");
 
         function collect() {
@@ -547,6 +609,13 @@
                 gutter: num(gutterTxt.text, s.gutter),
                 cutMarksOn: cutChk.value,
                 cutMarksStyle: cutDd.selection.index,
+                cutMarksOpacity: Math.max(1, Math.min(100, num(opacTxt.text, s.cutMarksOpacity))),
+                cutMarksEdge: edgeDd.selection.index,
+                cutMarksMode: modeDd.selection.index,
+                cutMarksLenMm: num(mlenTxt.text, s.cutMarksLenMm),
+                cutMarksWeightPt: num(mwtTxt.text, s.cutMarksWeightPt),
+                cutMarksCenter: centerChk.value,
+                cutMarksDashed: dashedChk.value,
                 placement: placeDd.selection.index,
                 duplex: dupChk.value,
                 duplexFlip: flipDd.selection.index,
@@ -595,11 +664,6 @@
             var ns = collect();
             if (!validate(ns, true)) return;
             result.action = "generate"; result.settings = ns; dlg.close(1);
-        };
-        testBtn.onClick = function () {
-            var ns = collect();
-            if (!validate(ns, false)) return;
-            result.action = "test"; result.settings = ns; dlg.close(1);
         };
         cancelBtn.onClick = function () { result.action = null; dlg.close(0); };
 
@@ -706,54 +770,96 @@
         doc.selection.deselect();
     }
 
-    function addText(doc, str, cx, cy, sizePx, color) {
-        var t = doc.artLayers.add();
-        t.kind = LayerKind.TEXT;
-        var ti = t.textItem;
-        ti.kind = TextType.POINTTEXT;
-        ti.contents = str;
-        ti.justification = Justification.CENTER;
-        ti.size = new UnitValue(sizePx, "px");
-        ti.color = color;
-        ti.position = [new UnitValue(cx, "px"), new UnitValue(cy + sizePx * 0.35, "px")];
-        return t;
-    }
-
-    function drawCutMarks(doc, layout, styleIndex, ppi, Wpx, Hpx, black, bleedPx) {
+    function drawCutMarks(doc, layout, s, Wpx, Hpx, black, bleedPx) {
         bleedPx = bleedPx || 0;
-        var sw = Math.max(1, Math.round(ptToPx(0.25, ppi)));
-        // Build a single selection covering every mark shape. That selection
-        // becomes the layer mask of an Invert adjustment layer, so the marks
-        // invert whatever is beneath them instead of being flat black lines --
-        // far easier to see against busy artwork. The adjustment layer is then
-        // dropped to 30% opacity for a subtle effect.
+        var ppi = s.ppi;
+        var sw = Math.max(1, Math.round(ptToPx(s.cutMarksWeightPt, ppi)));
+        var markLen = Math.max(1, mmToPxRound(s.cutMarksLenMm, ppi));
+        var style = CUTMARK_STYLES[s.cutMarksStyle];
+        // Corner styles can sit at the trim (card) edge or the outer bleed edge.
+        // With no bleed the two coincide.
+        var inset = (s.cutMarksEdge === 1) ? 0 : bleedPx;
+
+        // Build a single selection covering every mark shape, then realise it as
+        // either a masked Invert adjustment layer (subtle, stays visible over any
+        // artwork) or solid black fills.
         doc.selection.deselect();
         var sel = { active: false };
-        if (CUTMARK_STYLES[styleIndex] === "Corner crop marks") {
-            selectCornerMarks(doc, layout, ppi, sw, sel, bleedPx);
+        if (style === "Corner crop marks") {
+            selectCornerMarks(doc, layout, sw, markLen, sel, inset, false);
+        } else if (style === "Corner crosses") {
+            selectCornerMarks(doc, layout, sw, markLen, sel, inset, true);
         } else {
-            selectGutterGridlines(doc, layout, sw, Wpx, Hpx, sel, bleedPx);
+            selectGutterGridlines(doc, layout, sw, Wpx, Hpx, sel, bleedPx, s.cutMarksDashed, markLen);
         }
+        if (s.cutMarksCenter) selectCenterMarks(doc, sw, markLen, Wpx, Hpx, sel);
         if (!sel.active) return null;
-        var layer = makeInvertAdjustmentLayer(doc);
-        layer.name = "Cut Marks";
-        layer.opacity = 30;
+
+        // Anchor at the top level so the marks sit above the sheet groups rather
+        // than nested inside whichever group was last active.
+        doc.activeLayer = doc.layers[0];
+        var layer;
+        if (s.cutMarksMode === 1) {
+            // Solid lines: fill the accumulated selection with black.
+            layer = doc.artLayers.add();
+            layer.name = "Cut Marks";
+            doc.activeLayer = layer;
+            doc.selection.fill(black);
+        } else {
+            // Invert adjustment layer; the active selection becomes its mask.
+            layer = makeInvertAdjustmentLayer(doc);
+            layer.name = "Cut Marks";
+        }
+        layer.opacity = Math.max(1, Math.min(100, s.cutMarksOpacity));
         doc.selection.deselect();
         return layer;
     }
 
-    // Creates an Invert adjustment layer. When a selection is active, Photoshop
-    // automatically uses it as the new layer's mask. Returns the created layer.
-    function makeInvertAdjustmentLayer(doc) {
+    // Creates an adjustment layer of the given Type class (e.g. "Invr" or
+    // "BrgC" via charIDToTypeID, or the "vibrance" string id). When a selection
+    // is active, Photoshop turns it into the new layer's mask. Returns the layer.
+    function makeAdjustmentLayer(doc, typeID) {
         var desc = new ActionDescriptor();
         var ref = new ActionReference();
         ref.putClass(charIDToTypeID("AdjL"));
         desc.putReference(charIDToTypeID("null"), ref);
         var using = new ActionDescriptor();
-        using.putClass(charIDToTypeID("Type"), charIDToTypeID("Invr"));
+        using.putClass(charIDToTypeID("Type"), typeID);
         desc.putObject(charIDToTypeID("Usng"), charIDToTypeID("AdjL"), using);
         executeAction(charIDToTypeID("Mk  "), desc, DialogModes.NO);
         return doc.activeLayer;
+    }
+
+    function makeInvertAdjustmentLayer(doc) {
+        return makeAdjustmentLayer(doc, charIDToTypeID("Invr"));
+    }
+
+    // Puts the cut marks and the two global adjustment layers (Vibrance,
+    // Brightness/Contrast) into their own folder at the very top of the stack,
+    // above every sheet group. The folder keeps Photoshop's default pass-through
+    // blend mode, so the adjustments still affect all sheets below it.
+    function addTopFolder(doc, s, layout, Wpx, Hpx, black, bleedPx) {
+        // Create the folder anchored on a known root layer (the bottom one), then
+        // lift it above everything. Creating it low guarantees it is never the
+        // current top layer, so the move can't become a no-op self-move.
+        doc.activeLayer = doc.layers[doc.layers.length - 1];
+        var topSet = doc.layerSets.add();
+        topSet.name = "Cut Marks & Adjustments";
+        topSet.move(doc.layers[0], ElementPlacement.PLACEBEFORE);
+
+        // Adjustments first so they sit below the marks inside the folder; the
+        // marks then go on top, unaffected by the adjustments. Each layer is
+        // created wherever the active layer is, then moved into the folder.
+        var vib = makeAdjustmentLayer(doc, stringIDToTypeID("vibrance"));
+        vib.name = "Vibrance";
+        vib.move(topSet, ElementPlacement.INSIDE);
+        var bc = makeAdjustmentLayer(doc, charIDToTypeID("BrgC"));
+        bc.name = "Brightness/Contrast";
+        bc.move(topSet, ElementPlacement.INSIDE);
+        if (s.cutMarksOn) {
+            var cm = drawCutMarks(doc, layout, s, Wpx, Hpx, black, bleedPx);
+            if (cm) cm.move(topSet, ElementPlacement.INSIDE);
+        }
     }
 
     // Adds a rectangle to the running mark selection, replacing on the first
@@ -767,31 +873,60 @@
         sel.active = true;
     }
 
-    function selectCornerMarks(doc, layout, ppi, sw, sel, bleedPx) {
-        var markLen = mmToPxRound(3, ppi);
+    // A plus/cross centred at (x,y): a horizontal and a vertical bar of
+    // thickness sw, each arm markLen long.
+    function crossAt(doc, x, y, sw, hs, markLen, sel) {
+        selectRect(doc, x - markLen, y - hs, x + markLen, y - hs + sw, sel);
+        selectRect(doc, x - hs, y - markLen, x - hs + sw, y + markLen, sel);
+    }
+
+    // Corner marks for every slot. When cross is true each corner gets a full
+    // '+'; otherwise an L-shaped crop mark sitting just outside the corner.
+    // inset positions the marks at the trim line (inset=bleedPx) or the bleed
+    // edge (inset=0).
+    function selectCornerMarks(doc, layout, sw, markLen, sel, inset, cross) {
         var hs = Math.floor(sw / 2);
         var s, i;
         for (i = 0; i < layout.slots.length; i++) {
             s = layout.slots[i];
-            // Marks sit at the trim line, inset from the (bleed-inclusive) slot.
-            var cx = Math.round(s.xPx + bleedPx), cy = Math.round(s.yPx + bleedPx);
-            var cr = Math.round(s.xPx + s.wPx - bleedPx), cb = Math.round(s.yPx + s.hPx - bleedPx);
-            // Top-left
-            selectRect(doc, cx - markLen, cy - hs, cx, cy - hs + sw, sel);
-            selectRect(doc, cx - hs, cy - markLen, cx - hs + sw, cy, sel);
-            // Top-right
-            selectRect(doc, cr, cy - hs, cr + markLen, cy - hs + sw, sel);
-            selectRect(doc, cr - hs, cy - markLen, cr - hs + sw, cy, sel);
-            // Bottom-left
-            selectRect(doc, cx - markLen, cb - hs, cx, cb - hs + sw, sel);
-            selectRect(doc, cx - hs, cb, cx - hs + sw, cb + markLen, sel);
-            // Bottom-right
-            selectRect(doc, cr, cb - hs, cr + markLen, cb - hs + sw, sel);
-            selectRect(doc, cr - hs, cb, cr - hs + sw, cb + markLen, sel);
+            var cx = Math.round(s.xPx + inset), cy = Math.round(s.yPx + inset);
+            var cr = Math.round(s.xPx + s.wPx - inset), cb = Math.round(s.yPx + s.hPx - inset);
+            if (cross) {
+                crossAt(doc, cx, cy, sw, hs, markLen, sel);
+                crossAt(doc, cr, cy, sw, hs, markLen, sel);
+                crossAt(doc, cx, cb, sw, hs, markLen, sel);
+                crossAt(doc, cr, cb, sw, hs, markLen, sel);
+            } else {
+                // Top-left
+                selectRect(doc, cx - markLen, cy - hs, cx, cy - hs + sw, sel);
+                selectRect(doc, cx - hs, cy - markLen, cx - hs + sw, cy, sel);
+                // Top-right
+                selectRect(doc, cr, cy - hs, cr + markLen, cy - hs + sw, sel);
+                selectRect(doc, cr - hs, cy - markLen, cr - hs + sw, cy, sel);
+                // Bottom-left
+                selectRect(doc, cx - markLen, cb - hs, cx, cb - hs + sw, sel);
+                selectRect(doc, cx - hs, cb, cx - hs + sw, cb + markLen, sel);
+                // Bottom-right
+                selectRect(doc, cr, cb - hs, cr + markLen, cb - hs + sw, sel);
+                selectRect(doc, cr - hs, cb, cr - hs + sw, cb + markLen, sel);
+            }
         }
     }
 
-    function selectGutterGridlines(doc, layout, sw, Wpx, Hpx, sel, bleedPx) {
+    // Short tick marks at the midpoint of each sheet edge -- handy as fold or
+    // registration guides, especially for lining up duplex sheets.
+    function selectCenterMarks(doc, sw, markLen, Wpx, Hpx, sel) {
+        var hs = Math.floor(sw / 2);
+        var mx = Math.round(Wpx / 2), my = Math.round(Hpx / 2);
+        // Top & bottom edges: vertical ticks at the horizontal centre.
+        selectRect(doc, mx - hs, 0, mx - hs + sw, markLen, sel);
+        selectRect(doc, mx - hs, Hpx - markLen, mx - hs + sw, Hpx, sel);
+        // Left & right edges: horizontal ticks at the vertical centre.
+        selectRect(doc, 0, my - hs, markLen, my - hs + sw, sel);
+        selectRect(doc, Wpx - markLen, my - hs, Wpx, my - hs + sw, sel);
+    }
+
+    function selectGutterGridlines(doc, layout, sw, Wpx, Hpx, sel, bleedPx, dashed, markLen) {
         var cols = layout.cols, rows = layout.rows, slots = layout.slots;
         var c, r;
         for (c = 0; c < cols - 1; c++) {
@@ -800,16 +935,33 @@
             // Trim edges: right card's left trim and left card's right trim.
             var gl = Math.round(leftCard.xPx + leftCard.wPx - bleedPx);
             var gr = Math.round(rightCard.xPx + bleedPx);
-            selectRect(doc, gl, 0, gl + sw, Hpx, sel);
-            selectRect(doc, gr - sw, 0, gr, Hpx, sel);
+            selectVLine(doc, gl, sw, 0, Hpx, sel, dashed, markLen);
+            selectVLine(doc, gr - sw, sw, 0, Hpx, sel, dashed, markLen);
         }
         for (r = 0; r < rows - 1; r++) {
             var topCard = slots[r * cols];
             var botCard = slots[(r + 1) * cols];
             var gt = Math.round(topCard.yPx + topCard.hPx - bleedPx);
             var gb = Math.round(botCard.yPx + bleedPx);
-            selectRect(doc, 0, gt, Wpx, gt + sw, sel);
-            selectRect(doc, 0, gb - sw, Wpx, gb, sel);
+            selectHLine(doc, gt, sw, 0, Wpx, sel, dashed, markLen);
+            selectHLine(doc, gb - sw, sw, 0, Wpx, sel, dashed, markLen);
+        }
+    }
+
+    // Solid or dashed line of thickness sw. Dash/gap lengths derive from markLen
+    // so the same control tunes both corner marks and gridline dashes.
+    function selectVLine(doc, x, sw, top, bottom, sel, dashed, markLen) {
+        if (!dashed) { selectRect(doc, x, top, x + sw, bottom, sel); return; }
+        var dash = Math.max(2, markLen), gap = Math.max(2, Math.round(markLen * 0.66));
+        for (var y = top; y < bottom; y += dash + gap) {
+            selectRect(doc, x, y, x + sw, Math.min(bottom, y + dash), sel);
+        }
+    }
+    function selectHLine(doc, y, sw, left, right, sel, dashed, markLen) {
+        if (!dashed) { selectRect(doc, left, y, right, y + sw, sel); return; }
+        var dash = Math.max(2, markLen), gap = Math.max(2, Math.round(markLen * 0.66));
+        for (var x = left; x < right; x += dash + gap) {
+            selectRect(doc, x, y, Math.min(right, x + dash), y + sw, sel);
         }
     }
 
@@ -864,30 +1016,30 @@
             " per sheet; total cards " + total + "; sheets " + sheets +
             "; doc " + Wpx + "x" + Hpx + "px @ " + s.ppi + "ppi");
 
+        // All sheets share one document; each front/back sheet is its own
+        // top-level group so they can be toggled and printed individually.
+        newDoc("Koda Sheets", Wpx, Hpx, s.ppi);
+        var doc = app.activeDocument;
+
         var sheet;
         for (sheet = 0; sheet < sheets; sheet++) {
             var base = sheet * perSheet;
 
             // ---- FRONT ----
             log("Front sheet " + (sheet + 1) + "/" + sheets);
-            newDoc("Koda Front " + (sheet + 1), Wpx, Hpx, s.ppi);
-            var fdoc = app.activeDocument;
             var fLayers = [];
             var slotI;
             for (slotI = 0; slotI < perSheet; slotI++) {
                 var g = base + slotI;
                 if (g >= total) break;
                 var front = scan.fronts[g];
-                fLayers.push(placeCard(fdoc, front.file, layout.slots[slotI], 0, 0, asSO));
+                fLayers.push(placeCard(doc, front.file, layout.slots[slotI], 0, 0, asSO));
             }
-            groupLayers(fdoc, fLayers, "Front");
-            if (s.cutMarksOn) drawCutMarks(fdoc, layout, s.cutMarksStyle, s.ppi, Wpx, Hpx, black, bleedPx);
+            groupLayers(doc, fLayers, "Front " + (sheet + 1));
 
             // ---- BACK ----
             if (s.duplex) {
                 log("Back sheet " + (sheet + 1) + "/" + sheets);
-                newDoc("Koda Back " + (sheet + 1), Wpx, Hpx, s.ppi);
-                var bdoc = app.activeDocument;
                 var bLayers = [];
                 var p;
                 for (p = 0; p < perSheet; p++) {
@@ -900,69 +1052,17 @@
                     if (gf >= total) continue;
                     var backFile = scan.fronts[gf].back;
                     if (!backFile) continue; // blank white back
-                    bLayers.push(placeCard(bdoc, backFile, layout.slots[p], offX, offY, asSO, backDeg));
+                    bLayers.push(placeCard(doc, backFile, layout.slots[p], offX, offY, asSO, backDeg));
                 }
-                groupLayers(bdoc, bLayers, "Back");
-                if (s.cutMarksOn) drawCutMarks(bdoc, layout, s.cutMarksStyle, s.ppi, Wpx, Hpx, black, bleedPx);
+                groupLayers(doc, bLayers, "Back " + (sheet + 1));
             }
         }
+
+        // One shared set of cut marks (identical geometry for every sheet) plus
+        // the global adjustment layers, grouped in their own folder at the top.
+        addTopFolder(doc, s, layout, Wpx, Hpx, black, bleedPx);
+
         return { sheets: sheets, perSheet: perSheet, total: total, layout: layout };
-    }
-
-    // ----- Test reference sheet -----
-
-    function generateTestSheet(s) {
-        var L = makeLayout(s);
-        var layout = L.layout;
-        if (layout.count === 0) throw new Error("No cards fit with the current settings.");
-
-        var Wpx = L.Wpx;
-        var Hpx = L.Hpx;
-        var bleedPx = L.bleedPx;
-        var black = makeColor(0, 0, 0), white = makeColor(255, 255, 255);
-        var offX = Math.round(mmToPx(s.offX, s.ppi));
-        var offY = Math.round(mmToPx(s.offY, s.ppi));
-        var bw = Math.max(1, mmToPxRound(1.5, s.ppi));
-        var shortEdge = (DUPLEX_FLIPS[s.duplexFlip] === "Short edge (top-bottom)");
-        var backDeg = shortEdge ? 180 : 0;
-
-        // isBack: lays out the duplex back exactly like generateSheets so that,
-        // after the chosen flip, F# lands on the matching B#. The back label at a
-        // slot is the FRONT card number it backs (mirrored), rotated for the flip.
-        function drawSide(name, isBack) {
-            newDoc(name, Wpx, Hpx, s.ppi);
-            var doc = app.activeDocument;
-            var baseLayer = doc.artLayers.add();
-            baseLayer.name = "Placeholders";
-            var ox = isBack ? offX : 0, oy = isBack ? offY : 0;
-            var i;
-            for (i = 0; i < layout.slots.length; i++) {
-                var slot = layout.slots[i];
-                var x = Math.round(slot.xPx) + ox, y = Math.round(slot.yPx) + oy;
-                var w = Math.round(slot.wPx), h = Math.round(slot.hPx);
-                doc.activeLayer = baseLayer;
-                fillRect(doc, x, y, x + w, y + h, black);
-                fillRect(doc, x + bw, y + bw, x + w - bw, y + h - bw, white);
-                var label;
-                if (!isBack) {
-                    label = "F" + (i + 1);
-                } else {
-                    var frontSlot = shortEdge
-                        ? mirrorIndexV(i, layout.cols, layout.rows)
-                        : mirrorIndex(i, layout.cols);
-                    label = "B" + (frontSlot + 1);
-                }
-                var t = addText(doc, label, x + w / 2, y + h / 2, Math.round(h * 0.4), black);
-                if (isBack && backDeg) t.rotate(backDeg, AnchorPosition.MIDDLECENTER);
-            }
-            if (s.cutMarksOn) drawCutMarks(doc, layout, s.cutMarksStyle, s.ppi, Wpx, Hpx, black, bleedPx);
-        }
-
-        log("Test sheet: " + layout.cols + "x" + layout.rows + " = " + layout.count +
-            " slots; flip " + DUPLEX_FLIPS[s.duplexFlip]);
-        drawSide("Koda Test Front", false);
-        drawSide("Koda Test Back", true);
-        return { layout: layout };
     }
 
     // ======================================================================
@@ -1015,13 +1115,8 @@
                 alert("Done.\n\nCards: " + gr.total +
                     "\nPer sheet: " + gr.perSheet + " (" + gr.layout.cols + " x " + gr.layout.rows + ")" +
                     "\nSheets generated: " + gr.sheets + (s.duplex ? " front + " + gr.sheets + " back" : " (front only)") +
+                    "\nAll sheets are groups in one document (toggle to print)." +
                     "\nFronts without own back: " + miss +
-                    (logPath ? ("\n\nLog: " + logPath) : ""));
-            } else if (res.action === "test") {
-                generateTestSheet(s);
-                logPath = writeLog();
-                alert("Test reference sheets created (front + back).\n" +
-                    "Print duplex, flip on the long edge, and check F# aligns with B#." +
                     (logPath ? ("\n\nLog: " + logPath) : ""));
             }
         } catch (e) {
