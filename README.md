@@ -58,7 +58,7 @@ and cut marks.
 
 Settings are remembered between runs.
 
-If you push sacn, it will check the folder with some information that is expected input. 
+If you push scan, it will check the folder with and how the expected input. 
 
 <img width="339" height="217" alt="Screenshot 2026-06-26 141246" src="https://github.com/user-attachments/assets/027b3781-ead6-41ce-8a2f-74729c661052" />
 
