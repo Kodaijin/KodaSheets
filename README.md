@@ -1,4 +1,5 @@
-# Koda Sheets
+<img width="1496" height="408" alt="00010-2019737198" src="https://github.com/user-attachments/assets/dd60a68b-c09f-4773-8a5c-9131ba938dcc" />
+
 
 A card-sheet layout script for Adobe Photoshop. It tiles individual card
 images from a folder onto print-ready sheets, pairs fronts with backs by
