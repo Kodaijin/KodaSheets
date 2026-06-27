@@ -51,6 +51,8 @@ Please open issues if there are bugs or feature requests!
 
 ## Usage
 
+If you have jsx files associated with your Photoshop install you can just open the scipt file.
+
 1. In Photoshop, go to **File → Scripts → Browse…**
 2. Select `KodaSheets.jsx`.
 3. Choose your image folder and adjust the settings in the dialog.
