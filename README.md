@@ -1,6 +1,6 @@
 # Koda Sheets
 
-A card-sheet imposition script for Adobe Photoshop. It tiles individual card
+A card-sheet layout script for Adobe Photoshop. It tiles individual card
 images from a folder onto print-ready sheets, pairs fronts with backs by
 filename, and lays out duplex (double-sided) sheets that mirror correctly for
 flip alignment.
@@ -8,6 +8,8 @@ flip alignment.
 Built for tabletop card printing (custom decks, prototypes, proxies) where you
 want many cards laid out on a single sheet with proper margins, gutters, bleed,
 and cut marks.
+
+Please open issues if there are bugs or feature requests!
 
 ## Features
 
