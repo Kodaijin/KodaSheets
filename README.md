@@ -71,11 +71,15 @@ Addtionally it outputs a log file incase there is a problem.
 
 ### Backside alignment (duplex)
 
+<img width="263" height="253" alt="Screenshot 2026-06-27 163330" src="https://github.com/user-attachments/assets/79b983dd-c387-46fe-9ecb-7d52be69e6ed" />
+
 To calibrate the back offset, print `BacksideAlignmentTest.pdf` double-sided at
 **100% / Actual Size** (do not "scale to fit"), flipping on the edge your printer
 uses. Hold the sheet to a light and read where the back crosshair lands on the
 front ruler; enter those millimetre values as **Back calibration X / Y** in the
 dialog. The PDF is regenerated with `python tools/make_alignment_pdf.py`.
+
+Keep in mind that depending on your printer it can have A LOT of variance from print to print.
 
 ## Naming convention for backs
 
