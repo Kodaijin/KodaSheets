@@ -73,7 +73,8 @@
             cardW: 63, cardH: 88,
             ppi: 1200,
             margin: 5,
-            gutter: 2,
+            cardsTouching: true, // cards sit edge-to-edge with no gap
+            gutter: 2,           // spacing (mm) used when cardsTouching is false
             cutMarksOn: false,
             cutMarksStyle: 0,
             cutMarksOpacity: 30,   // percent
@@ -336,6 +337,7 @@
             d.putDouble(sid("cardH"), s.cardH);
             d.putDouble(sid("ppi"), s.ppi);
             d.putDouble(sid("margin"), s.margin);
+            d.putBoolean(sid("cardsTouching"), s.cardsTouching);
             d.putDouble(sid("gutter"), s.gutter);
             d.putBoolean(sid("cutMarksOn"), s.cutMarksOn);
             d.putInteger(sid("cutMarksStyle"), s.cutMarksStyle);
@@ -372,6 +374,7 @@
             if (d.hasKey(sid("cardH"))) s.cardH = d.getDouble(sid("cardH"));
             if (d.hasKey(sid("ppi"))) s.ppi = d.getDouble(sid("ppi"));
             if (d.hasKey(sid("margin"))) s.margin = d.getDouble(sid("margin"));
+            if (d.hasKey(sid("cardsTouching"))) s.cardsTouching = d.getBoolean(sid("cardsTouching"));
             if (d.hasKey(sid("gutter"))) s.gutter = d.getDouble(sid("gutter"));
             if (d.hasKey(sid("cutMarksOn"))) s.cutMarksOn = d.getBoolean(sid("cutMarksOn"));
             if (d.hasKey(sid("cutMarksStyle"))) s.cutMarksStyle = d.getInteger(sid("cutMarksStyle"));
@@ -471,9 +474,17 @@
         var ppiTxt = r3.add("edittext", undefined, String(s.ppi)); ppiTxt.characters = 6;
         r3.add("statictext", undefined, "  Margin:");
         var marginTxt = r3.add("edittext", undefined, String(s.margin)); marginTxt.characters = 4;
-        r3.add("statictext", undefined, "mm  Gutter:");
-        var gutterTxt = r3.add("edittext", undefined, String(s.gutter)); gutterTxt.characters = 4;
         r3.add("statictext", undefined, "mm");
+
+        // Card spacing: either edge-to-edge (no gap) or a fixed distance in mm.
+        var r3b = row(grid);
+        var touchChk = r3b.add("checkbox", undefined, "Cards touching (no gap)");
+        touchChk.value = s.cardsTouching;
+        r3b.add("statictext", undefined, "   Spacing:");
+        var gutterTxt = r3b.add("edittext", undefined, String(s.gutter)); gutterTxt.characters = 4;
+        r3b.add("statictext", undefined, "mm");
+        touchChk.onClick = function () { gutterTxt.enabled = !touchChk.value; };
+        gutterTxt.enabled = !touchChk.value;
 
         var r4 = row(grid);
         var bleedChk = r4.add("checkbox", undefined, "Images include bleed:");
@@ -606,6 +617,7 @@
                 cardH: num(cardH.text, s.cardH),
                 ppi: num(ppiTxt.text, s.ppi),
                 margin: num(marginTxt.text, s.margin),
+                cardsTouching: touchChk.value,
                 gutter: num(gutterTxt.text, s.gutter),
                 cutMarksOn: cutChk.value,
                 cutMarksStyle: cutDd.selection.index,
@@ -634,7 +646,8 @@
             if (pd.wMm <= 0 || pd.hMm <= 0) { alert("Paper size must be greater than 0."); return false; }
             if (cd.wMm <= 0 || cd.hMm <= 0) { alert("Card size must be greater than 0."); return false; }
             if (ns.ppi <= 0) { alert("PPI must be greater than 0."); return false; }
-            if (ns.margin < 0 || ns.gutter < 0) { alert("Margin/gutter cannot be negative."); return false; }
+            if (ns.margin < 0) { alert("Margin cannot be negative."); return false; }
+            if (!ns.cardsTouching && ns.gutter < 0) { alert("Card spacing cannot be negative."); return false; }
             if (ns.bleedOn && ns.bleedMm < 0) { alert("Bleed cannot be negative."); return false; }
             return true;
         }
@@ -975,11 +988,14 @@
         var pd = resolvePaperDims(s), cd = resolveCardDims(s);
         var bleedMm = s.bleedOn ? s.bleedMm : 0;
         var style = LAYOUT_STYLES[s.layoutStyle] || LAYOUT_STYLES[0];
+        // Effective spacing: touching cards sit edge-to-edge (0 mm); otherwise
+        // use the user-supplied distance. Cut marks no longer force a minimum
+        // gap, so adjacent cards can share a single cut line at 0 spacing.
+        var effGutter = s.cardsTouching ? 0 : s.gutter;
         var layout = computeLayout({
             paperW: pd.wMm, paperH: pd.hMm,
             cardW: cd.wMm + 2 * bleedMm, cardH: cd.hMm + 2 * bleedMm,
-            margin: s.margin, gutter: s.gutter, ppi: s.ppi,
-            reserveGutterForMarks: s.cutMarksOn,
+            margin: s.margin, gutter: effGutter, ppi: s.ppi,
             forceCols: style[1], forceRows: style[2]
         });
         return {

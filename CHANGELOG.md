@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Card spacing control**: a "Cards touching (no gap)" toggle (on by default)
+  arranges cards edge-to-edge so adjacent cards share a single cut line; turn it
+  off to enter a fixed spacing in mm. Cut marks no longer force a minimum gap, so
+  touching cards stay truly touching even with cut marks enabled.
+
 - All generated sheets now live in a single document, with each front/back sheet
   as its own top-level group, instead of one document per sheet.
 - Vibrance and Brightness/Contrast adjustment layers, together with the cut

@@ -38,8 +38,9 @@ and cut marks.
 - **Smart Object or rasterized** placement.
 - Paper presets (US Letter, A4, Custom) and card presets (Poker, Bridge, Tarot,
   Standard TCG, Custom).
-- Layout presets (Auto fit, 3×3, 2×4, 2×3) at configurable margin, gutter,
-  and PPI.
+- Layout presets (Auto fit, 3×3, 2×4, 2×3) at configurable margin and PPI.
+- **Card spacing**: cards sit edge-to-edge with no gap by default (adjacent cards
+  share a single cut line), or enter a fixed spacing in mm to keep them apart.
 
 ## Requirements
 
