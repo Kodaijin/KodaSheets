@@ -1,6 +1,7 @@
-# Koda Sheets
+<img width="1496" height="408" alt="00010-2019737198" src="https://github.com/user-attachments/assets/dd60a68b-c09f-4773-8a5c-9131ba938dcc" />
 
-A card-sheet imposition script for Adobe Photoshop. It tiles individual card
+
+A card-sheet layout script for Adobe Photoshop. It tiles individual card
 images from a folder onto print-ready sheets, pairs fronts with backs by
 filename, and lays out duplex (double-sided) sheets that mirror correctly for
 flip alignment.
@@ -8,6 +9,8 @@ flip alignment.
 Built for tabletop card printing (custom decks, prototypes, proxies) where you
 want many cards laid out on a single sheet with proper margins, gutters, bleed,
 and cut marks.
+
+Please open issues if there are bugs or feature requests!
 
 ## Features
 
@@ -50,20 +53,35 @@ and cut marks.
 
 ## Usage
 
+If you have jsx files associated with your Photoshop install you can just open the scipt file.
+
 1. In Photoshop, go to **File → Scripts → Browse…**
 2. Select `KodaSheets.jsx`.
 3. Choose your image folder and adjust the settings in the dialog.
 4. Generate the sheets.
 
+<img width="497" height="662" alt="Screenshot 2026-06-26 162209" src="https://github.com/user-attachments/assets/2e3e12b5-e5af-438f-aa9f-b2ec84a17f9b" />
+
 Settings are remembered between runs.
 
+If you push scan, it will check the folder with and how the expected input. 
+
+<img width="339" height="217" alt="Screenshot 2026-06-26 141246" src="https://github.com/user-attachments/assets/027b3781-ead6-41ce-8a2f-74729c661052" />
+
+Addtionally it outputs a log file incase there is a problem.
+
+
 ### Backside alignment (duplex)
+
+<img width="263" height="253" alt="Screenshot 2026-06-27 163330" src="https://github.com/user-attachments/assets/79b983dd-c387-46fe-9ecb-7d52be69e6ed" />
 
 To calibrate the back offset, print `BacksideAlignmentTest.pdf` double-sided at
 **100% / Actual Size** (do not "scale to fit"), flipping on the edge your printer
 uses. Hold the sheet to a light and read where the back crosshair lands on the
 front ruler; enter those millimetre values as **Back calibration X / Y** in the
 dialog. The PDF is regenerated with `python tools/make_alignment_pdf.py`.
+
+Keep in mind that depending on your printer it can have A LOT of variance from print to print.
 
 ## Naming convention for backs
 
