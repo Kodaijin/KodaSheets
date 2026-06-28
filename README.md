@@ -47,7 +47,7 @@ Please open issues if there are bugs or feature requests!
 
 ## Requirements
 
-- Adobe Photoshop (tested through Photoshop 2025).
+- Adobe Photoshop (tested all CC through Photoshop 2025).
 - No installation needed. The script is plain ExtendScript (ES3) that uses the
   classic Photoshop DOM.
 
