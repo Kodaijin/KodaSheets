@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GIMP 3 support**: a Python-Fu port of the whole tool under
+  `gimp/plug-ins/koda-sheets/`, installable as a GIMP 3.0+ plug-in
+  (**Filters → Koda Sheets…**, tested on GIMP 3.2). It shares the same layout
+  engine, front/back pairing, natural sort, duplex mirroring, bleed handling,
+  and cut-mark styles as the Photoshop script. Notable GIMP-specific behaviour:
+  cards are always placed rasterized (no Smart Objects); the "Invert (subtle)"
+  cut-mark mode is reproduced with a white-filled Difference-mode layer; and the
+  global Vibrance / Brightness-Contrast adjustment layers are omitted (GIMP has
+  no pass-through adjustment layers). Settings persist as JSON in the GIMP user
+  directory. Pure layout/scan/units logic has its own framework-free test suite
+  (`test/test_layout.py`).
+
 - **Card spacing control**: a "Cards touching (no gap)" toggle (on by default)
   arranges cards edge-to-edge so adjacent cards share a single cut line; turn it
   off to enter a fixed spacing in mm. Cut marks no longer force a minimum gap, so

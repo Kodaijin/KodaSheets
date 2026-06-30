@@ -16,3 +16,7 @@ Desktop.ini
 
 # Node (tests)
 node_modules/
+
+# Python (GIMP plug-in)
+__pycache__/
+*.pyc
