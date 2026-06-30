@@ -95,17 +95,21 @@ styles as the Photoshop script.
 
 ### Install
 
-1. Find your GIMP plug-ins folder: **Edit → Preferences → Folders → Plug-ins**
+0. If you download thw zip file, you need to extract it first.
+
+00. If you download the whole source code, the folder you need to copy is in /gimp/plug-ins/koda-sheets <-- this is the folder you copy.
+
+2. Find your GIMP plug-ins folder: **Edit → Preferences → Folders → Plug-ins**
    (typically `%APPDATA%\GIMP\<version>\plug-ins\` on Windows or
    `~/.config/GIMP/<version>/plug-ins/` on Linux/macOS, where `<version>` is
    your GIMP series, e.g. `3.0` or `3.2`). Use the path shown in Preferences —
    it's the authoritative one for your install.
-2. Copy the whole `koda-sheets` folder (the one containing `koda-sheets.py` and
+3. Copy the whole `koda-sheets` folder (the one containing `koda-sheets.py` and
    the `kodasheets/` package) into that plug-ins folder. Keep the folder name
    `koda-sheets` so it matches `koda-sheets.py`.
-3. On Linux/macOS, make sure `koda-sheets.py` is executable
+4. On Linux/macOS, make sure `koda-sheets.py` is executable
    (`chmod +x koda-sheets.py`).
-4. Restart GIMP. The command appears at **Filters → Koda Sheets…**
+5. Restart GIMP. The command appears at **Filters → Koda Sheets…**
 
 ### Usage
 
