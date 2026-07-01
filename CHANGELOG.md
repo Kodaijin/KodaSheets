@@ -9,27 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Crop canvas to cards (GIMP)**: a "Crop canvas to cards (print true size)"
-  toggle (on by default) trims the empty paper margin so the finished document
-  is exactly the card block (plus any corner cut marks). This fixes cards
-  printing undersized when bleed is on: with a full paper-sized canvas, print
-  drivers shrink-to-fit the sheet inside their unprintable margin, scaling the
-  cards down; cropping to the block lets the sheet print at true 1:1 size. Note
-  that page-edge center/registration marks and full-canvas gutter gridlines are
-  trimmed away when this is on — turn it off to keep the full paper sheet.
-
-- **GIMP 3 support**: a Python-Fu port of the whole tool under
-  `gimp/plug-ins/koda-sheets/`, installable as a GIMP 3.0+ plug-in
-  (**Filters → Koda Sheets…**, tested on GIMP 3.2). It shares the same layout
-  engine, front/back pairing, natural sort, duplex mirroring, bleed handling,
-  and cut-mark styles as the Photoshop script. Notable GIMP-specific behaviour:
-  cards are always placed rasterized (no Smart Objects); the "Invert (subtle)"
-  cut-mark mode is reproduced with a white-filled Difference-mode layer; and the
-  global Vibrance / Brightness-Contrast adjustment layers are omitted (GIMP has
-  no pass-through adjustment layers). Settings persist as JSON in the GIMP user
-  directory. Pure layout/scan/units logic has its own framework-free test suite
-  (`test/test_layout.py`).
-
 - **Card spacing control**: a "Cards touching (no gap)" toggle (on by default)
   arranges cards edge-to-edge so adjacent cards share a single cut line; turn it
   off to enter a fixed spacing in mm. Cut marks no longer force a minimum gap, so
@@ -55,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **GIMP 3 port removed** (`gimp/plug-ins/koda-sheets/` and its
+  `test/test_layout.py`). The Python-Fu plug-in is being recoded from scratch
+  and will return in a future release; only the Photoshop script (`KodaSheets.jsx`)
+  is shipping for now.
 - The in-script "Generate Test Sheet" button. Backside calibration is now the
   printable `BacksideAlignmentTest.pdf` instead of generated Photoshop documents.
 
