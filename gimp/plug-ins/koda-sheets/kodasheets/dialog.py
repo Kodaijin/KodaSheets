@@ -160,6 +160,16 @@ def show_dialog(s):
     o0.pack_start(layout_dd, False, False, 0)
     out_box.add(o0)
 
+    o0b = _hbox()
+    crop_chk = Gtk.CheckButton(label="Crop canvas to cards (print true size)")
+    crop_chk.set_active(s["crop_to_cards"])
+    crop_chk.set_tooltip_text(
+        "Trim the empty paper margin so printers reproduce the cards at true "
+        "1:1 size instead of shrinking the whole sheet to fit. Page-edge "
+        "center marks and full-canvas gridlines are trimmed when this is on.")
+    o0b.pack_start(crop_chk, False, False, 0)
+    out_box.add(o0b)
+
     o2 = _hbox()
     cut_chk = Gtk.CheckButton(label="Cut marks:")
     cut_chk.set_active(s["cut_marks_on"])
@@ -311,6 +321,7 @@ def show_dialog(s):
             "bleed_on": bleed_chk.get_active(),
             "bleed_mm": _num(bleed_e.get_text(), s["bleed_mm"]),
             "layout_style": layout_dd.get_active(),
+            "crop_to_cards": crop_chk.get_active(),
         }
 
     def validate(ns):

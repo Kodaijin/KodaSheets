@@ -20,7 +20,7 @@ from kodasheets.units import (MM_PER_INCH, mm_to_px, mm_to_px_round, px_to_mm,
                               pt_to_px)
 from kodasheets.layout import compute_layout, mirror_index, mirror_index_v
 from kodasheets.scan import natural_compare, scan_folder
-from kodasheets.presets import make_layout, default_settings
+from kodasheets.presets import make_layout, default_settings, compute_crop_box
 
 passed = 0
 failed = 0
@@ -191,6 +191,62 @@ def t_force_grid():
     assert_eq(L["layout"]["fits"], True, "forced fits")
 
 
+# --- crop-to-cards box ---------------------------------------------------
+
+def t_crop_box_tight_to_block():
+    # No cut marks: crop box is exactly the card block bounding box, and it is
+    # strictly smaller than the full paper so the crop actually fires.
+    s = default_settings()
+    s["cut_marks_on"] = False
+    L = make_layout(s)
+    slots = L["layout"]["slots"]
+    x, y, w, h = compute_crop_box(L, s)
+    left = min(sl["x_px"] for sl in slots)
+    top = min(sl["y_px"] for sl in slots)
+    right = max(sl["x_px"] + sl["w_px"] for sl in slots)
+    bottom = max(sl["y_px"] + sl["h_px"] for sl in slots)
+    assert_eq(x, max(0, __import__("math").floor(left + 0.5)), "crop x")
+    assert_eq(y, max(0, __import__("math").floor(top + 0.5)), "crop y")
+    assert_eq(w, __import__("math").floor(right + 0.5) - x, "crop w")
+    assert_eq(h, __import__("math").floor(bottom + 0.5) - y, "crop h")
+    assert_eq(w < L["w_px"] and h < L["h_px"], True, "crop smaller than paper")
+
+
+def t_crop_box_bleed_includes_bleed():
+    # With the grid held fixed, turning bleed on makes each card - and thus the
+    # cropped block - bigger. (Under auto-fit, bleed can instead reduce the card
+    # count, so pin the grid to isolate the per-card growth.)
+    base = default_settings()
+    base["cut_marks_on"] = False
+    base["card_preset"] = 4       # Custom
+    base["card_w"] = 40
+    base["card_h"] = 40
+    base["layout_style"] = 3      # 2 x 3 (fits with and without bleed)
+    no_bleed = compute_crop_box(make_layout(base), base)
+    bleedy = dict(base); bleedy["bleed_on"] = True
+    with_bleed = compute_crop_box(make_layout(bleedy), bleedy)
+    assert_eq(with_bleed[2] > no_bleed[2], True, "bleed widens crop")
+    assert_eq(with_bleed[3] > no_bleed[3], True, "bleed heightens crop")
+
+
+def t_crop_box_marks_expand_and_clamp():
+    # Corner marks at the bleed edge push the box outward but never past 0 / the
+    # paper edge.
+    s = default_settings()
+    s["cut_marks_on"] = True
+    s["cut_marks_style"] = 0      # Corner crop marks
+    s["cut_marks_edge"] = 1       # Bleed edge (inset 0 -> full overhang)
+    s["cut_marks_len_mm"] = 3
+    L = make_layout(s)
+    x, y, w, h = compute_crop_box(L, s)
+    assert_eq(x >= 0 and y >= 0, True, "crop origin non-negative")
+    assert_eq(x + w <= L["w_px"], True, "crop right within paper")
+    assert_eq(y + h <= L["h_px"], True, "crop bottom within paper")
+    no_marks = dict(s); no_marks["cut_marks_on"] = False
+    nx, ny, nw, nh = compute_crop_box(make_layout(no_marks), no_marks)
+    assert_eq(w >= nw and h >= nh, True, "marks expand (or clamp) the box")
+
+
 # --- mirror indices ------------------------------------------------------
 
 def t_mirror_index():
@@ -267,6 +323,9 @@ TESTS = [
     ("reserve_gutter_for_marks lifts gutter to 2mm", t_reserve_gutter),
     ("Gutter spacing between adjacent slots", t_gutter_spacing),
     ("Forced grid (make_layout) fits", t_force_grid),
+    ("crop-to-cards box is tight to the block", t_crop_box_tight_to_block),
+    ("crop-to-cards box grows with bleed", t_crop_box_bleed_includes_bleed),
+    ("crop-to-cards box expands for marks and clamps", t_crop_box_marks_expand_and_clamp),
     ("mirror_index - 3-column grid", t_mirror_index),
     ("mirror_index - 2-column grid", t_mirror_index_2col),
     ("mirror_index is its own inverse", t_mirror_index_involution),

@@ -19,7 +19,8 @@ from gi.repository import Gimp, Gegl, Gio  # noqa: E402
 
 from .units import js_round, mm_to_px, mm_to_px_round, pt_to_px  # noqa: E402
 from .layout import mirror_index, mirror_index_v  # noqa: E402
-from .presets import (CUTMARK_STYLES, DUPLEX_FLIPS, make_layout)  # noqa: E402
+from .presets import (CUTMARK_STYLES, DUPLEX_FLIPS, compute_crop_box,  # noqa: E402
+                      make_layout)
 
 
 # ---------------------------------------------------------------------------
@@ -315,6 +316,15 @@ def generate_sheets(s, scan, log=None):
         # One shared set of cut marks (identical geometry for every sheet) on top.
         if s["cut_marks_on"]:
             _draw_cut_marks(image, layout, s, w_px, h_px, bleed_px, log)
+
+        # Crop the canvas down to the card block so the sheet prints at true
+        # 1:1 size instead of being shrunk to fit the printer's margin.
+        if s.get("crop_to_cards", True):
+            cx, cy, cw, ch = compute_crop_box(L, s)
+            if cw > 0 and ch > 0 and (cw < w_px or ch < h_px):
+                image.crop(cw, ch, cx, cy)
+                log("Cropped canvas to card block: %dx%d px at (%d,%d)"
+                    % (cw, ch, cx, cy))
 
         image.undo_enable()
         # Show the finished document. Display.new returns NULL with no GUI

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Crop canvas to cards (GIMP)**: a "Crop canvas to cards (print true size)"
+  toggle (on by default) trims the empty paper margin so the finished document
+  is exactly the card block (plus any corner cut marks). This fixes cards
+  printing undersized when bleed is on: with a full paper-sized canvas, print
+  drivers shrink-to-fit the sheet inside their unprintable margin, scaling the
+  cards down; cropping to the block lets the sheet print at true 1:1 size. Note
+  that page-edge center/registration marks and full-canvas gutter gridlines are
+  trimmed away when this is on — turn it off to keep the full paper sheet.
+
 - **GIMP 3 support**: a Python-Fu port of the whole tool under
   `gimp/plug-ins/koda-sheets/`, installable as a GIMP 3.0+ plug-in
   (**Filters → Koda Sheets…**, tested on GIMP 3.2). It shares the same layout

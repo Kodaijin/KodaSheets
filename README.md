@@ -28,6 +28,12 @@ Please open issues if there are bugs or feature requests!
     both light and dark artwork) or solid black lines, at a configurable opacity.
 - **Bleed support**: arranges cards at a bleed-inclusive size so images are
   never cropped, with marks drawn at the trim line.
+- **Crop canvas to cards (GIMP)**: on by default, trims the empty paper margin
+  so the sheet prints at true 1:1 size. Without it, print drivers shrink the
+  full-page canvas to fit their unprintable margin, which makes cards — bleed
+  cards especially — come out undersized. Page-edge center/registration marks
+  and full-canvas gutter gridlines are trimmed when this is on; turn it off to
+  keep the full paper sheet.
 - **Backside alignment test** as a ready-to-print PDF
   (`BacksideAlignmentTest.pdf`): print it double-sided at 100%, hold to a light,
   and read the back crosshair against the front mm ruler to find the X/Y offset
